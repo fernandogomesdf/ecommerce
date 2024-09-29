@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="1" author="ecommerce-dev">
+        <createTable tableName="category">
+            <!--column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column-->
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="bigint"/>
+        </createTable>
+
+        <sql>
+            ALTER TABLE category ADD COLUMN id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
+        </sql>
+
+        <createTable tableName="product">
+            <!--column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column-->
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="clob"/>
+            <column name="price" type="decimal(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available" type="boolean" defaultValueBoolean="true"/>
+            <column name="sku" type="varchar(50)">
+                <constraints unique="true"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <sql>
+            ALTER TABLE product ADD COLUMN id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY;
+        </sql>
+
+        <addForeignKeyConstraint baseColumnNames="parent_id" baseTableName="category" constraintName="fk_category_parent" referencedColumnNames="id" referencedTableName="category"/>
+        <addForeignKeyConstraint baseColumnNames="category_id" baseTableName="product" constraintName="fk_product_category" referencedColumnNames="id" referencedTableName="category"/>
+    </changeSet>
+
+    <include file="data_insert.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>
