@@ -1,7 +1,9 @@
 package br.eti.fernandogomes.ecommerce.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -10,6 +12,8 @@ import java.math.BigDecimal;
 @Table(name = "product")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Product {
 
     @Id
@@ -31,17 +35,6 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-
-    // Constructors
-    public Product() {}
-
-    public Product(String name, String description, BigDecimal price, Boolean available, Category category) {
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.available = available;
-        this.category = category;
-    }
 
 }
 

@@ -2,7 +2,6 @@ package br.eti.fernandogomes.ecommerce.service;
 
 
 import br.eti.fernandogomes.ecommerce.dto.ProductDTO;
-import br.eti.fernandogomes.ecommerce.entity.Product;
 import br.eti.fernandogomes.ecommerce.mapper.ProductMapper;
 import br.eti.fernandogomes.ecommerce.repository.CategoryRepository;
 import br.eti.fernandogomes.ecommerce.repository.ProductRepository;
@@ -32,10 +31,10 @@ public class ProductService {
         if (productRepository.existsByName(productDTO.getName())) {
             throw new IllegalArgumentException("Product with this name already exists");
         }
-        if (productDTO.getCategoryId() == null) {
+        if (productDTO.getCategory().getId() == null) {
             throw new IllegalArgumentException("Product must have a valid category");
         }
-        categoryRepository.findById(productDTO.getCategoryId())
+        categoryRepository.findById(productDTO.getCategory().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
 
         var product = productMapper.toEntity(productDTO);
@@ -75,10 +74,10 @@ public class ProductService {
         product.setPrice(productDetails.getPrice());
         product.setAvailable(productDetails.getAvailable());
 
-        if (productDetails.getCategoryId() != null) {
-            categoryRepository.findById(productDetails.getCategoryId())
+        if (productDetails.getCategory().getId() != null) {
+            categoryRepository.findById(productDetails.getCategory().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
-            product.setCategory(categoryRepository.findById(productDetails.getCategoryId()).orElse(null));
+            product.setCategory(categoryRepository.findById(productDetails.getCategory().getId()).orElse(null));
         }
 
         return productMapper.toDTO(productRepository.save(product));

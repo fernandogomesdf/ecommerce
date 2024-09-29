@@ -17,8 +17,4 @@ public class CategoryDTO {
     @NotBlank(message = "category name is required.")
     private String name;
 
-    // Constructor without id for creating new categories
-    public CategoryDTO(String name) {
-        this.name = name;
-    }
 }
