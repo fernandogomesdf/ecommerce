@@ -69,15 +69,28 @@ public class ProductService {
         var product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
-        product.setName(productDetails.getName());
-        product.setDescription(productDetails.getDescription());
-        product.setPrice(productDetails.getPrice());
-        product.setAvailable(productDetails.getAvailable());
+        if (productDetails != null) {
+            if (productDetails.getName() != null) {
+                product.setName(productDetails.getName());
+            }
 
-        if (productDetails.getCategory().getId() != null) {
-            categoryRepository.findById(productDetails.getCategory().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
-            product.setCategory(categoryRepository.findById(productDetails.getCategory().getId()).orElse(null));
+            if (productDetails.getDescription() != null) {
+                product.setDescription(productDetails.getDescription());
+            }
+
+            if (productDetails.getPrice() != null) {
+                product.setPrice(productDetails.getPrice());
+            }
+
+            if (productDetails.getAvailable() != null) {
+                product.setAvailable(productDetails.getAvailable());
+            }
+
+            if (productDetails.getCategory() != null && productDetails.getCategory().getId() != null) {
+                categoryRepository.findById(productDetails.getCategory().getId())
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
+                product.setCategory(categoryRepository.findById(productDetails.getCategory().getId()).orElse(null));
+            }
         }
 
         return productMapper.toDTO(productRepository.save(product));
