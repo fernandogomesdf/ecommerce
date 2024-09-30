@@ -2,7 +2,9 @@ package br.eti.fernandogomes.ecommerce.entity;
 
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashSet;
@@ -12,6 +14,8 @@ import java.util.Set;
 @Table(name = "category")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Category {
 
     @Id
@@ -21,20 +25,12 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Category> children = new HashSet<>();
+
     @ManyToOne
     @JoinColumn(name = "parent_id")
     private Category parent;
 
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Category> children = new HashSet<>();
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Product> products = new HashSet<>();
-
-    // Constructors
-    public Category() {}
-
-    public Category(String name) {
-        this.name = name;
-    }
 }

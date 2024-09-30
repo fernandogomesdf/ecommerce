@@ -60,7 +60,7 @@
   
   <!-- Diálogo para inclusão e edição -->
   <p-dialog
-    header="{{ isEditMode ? 'Editar Produto' : 'Incluir Produto' }}"
+    header="{{ isEditMode ? 'Edit Product' : 'Add Product' }}"
     [(visible)]="displayDialog"
     [modal]="true"
     [responsive]="true"
@@ -69,7 +69,6 @@
     <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
 
       <br />
-      
       <table>
         <tr>
          <td><label for="name">Name</label></td>
@@ -111,8 +110,6 @@
     </form>
   </p-dialog>
   
-  <!-- Diálogo de confirmação -->
-  <p-confirmDialog header="Confirmação" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+  <p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
   
-  <!-- Toast para mensagens -->
   <p-toast></p-toast>

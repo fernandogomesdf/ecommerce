@@ -1,10 +1,9 @@
 package br.eti.fernandogomes.ecommerce.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -14,7 +13,6 @@ public class CategoryDTO {
 
     private Long id;
 
-    @NotBlank(message = "category name is required.")
     private String name;
 
 }
