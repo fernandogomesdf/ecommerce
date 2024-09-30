@@ -10,13 +10,16 @@ import br.eti.fernandogomes.ecommerce.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ProductService {
@@ -123,6 +126,11 @@ public class ProductService {
             productPage = productRepository.findAll(pageable);
         }
 
-        return productPage.map(productMapper::toDTO);
+        List<ProductDTO> productDTOList = new ArrayList<>();
+        for (Product product : productPage.getContent()) {
+            ProductDTO productDTO = productMapper.toDTO(product);
+            productDTOList.add(productDTO);
+        }
+        return new PageImpl<>(productDTOList, pageable, productPage.getTotalElements());
     }
 }
