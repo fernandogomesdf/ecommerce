@@ -2,10 +2,16 @@ package br.eti.fernandogomes.ecommerce.service;
 
 
 import br.eti.fernandogomes.ecommerce.dto.ProductDTO;
+import br.eti.fernandogomes.ecommerce.entity.Category;
+import br.eti.fernandogomes.ecommerce.entity.Product;
 import br.eti.fernandogomes.ecommerce.mapper.ProductMapper;
 import br.eti.fernandogomes.ecommerce.repository.CategoryRepository;
 import br.eti.fernandogomes.ecommerce.repository.ProductRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -53,7 +59,10 @@ public class ProductService {
     }
 
     public List<ProductDTO> getProductsByCategory(Long categoryId) {
-        return productRepository.findByCategory_Id(categoryId).stream()
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + categoryId));
+
+        return productRepository.findByCategory(category).stream()
                 .map(productMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -102,5 +111,18 @@ public class ProductService {
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
         productRepository.delete(product);
+    }
+
+    public Page<ProductDTO> getAllProducts(int page, int size, String search) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Product> productPage;
+
+        if (search != null && !search.isEmpty()) {
+            productPage = productRepository.findByNameContainingIgnoreCase(search, pageable);
+        } else {
+            productPage = productRepository.findAll(pageable);
+        }
+
+        return productPage.map(productMapper::toDTO);
     }
 }
