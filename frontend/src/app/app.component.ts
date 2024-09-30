@@ -10,15 +10,11 @@ import { Aura } from 'primeng/themes/aura';
 export class AppComponent {
   
   title = 'ecommerce';
-  visible: boolean = false;
 
 
   constructor(private config: PrimeNGConfig) {
     this.config.theme.set({ preset: Aura });
   }
 
-  showDialog() {
-    this.visible = true;
-  }
 
 }
