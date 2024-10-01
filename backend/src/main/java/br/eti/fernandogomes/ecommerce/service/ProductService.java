@@ -1,38 +1,29 @@
 package br.eti.fernandogomes.ecommerce.service;
 
-
+import br.eti.fernandogomes.ecommerce.dto.CategoryDTO;
 import br.eti.fernandogomes.ecommerce.dto.ProductDTO;
 import br.eti.fernandogomes.ecommerce.entity.Category;
 import br.eti.fernandogomes.ecommerce.entity.Product;
-import br.eti.fernandogomes.ecommerce.mapper.ProductMapper;
 import br.eti.fernandogomes.ecommerce.repository.CategoryRepository;
 import br.eti.fernandogomes.ecommerce.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
-    private final ProductMapper productMapper;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, ProductMapper productMapper) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
-        this.productMapper = productMapper;
     }
 
     // Create
@@ -40,25 +31,27 @@ public class ProductService {
         if (productRepository.existsByName(productDTO.getName())) {
             throw new IllegalArgumentException("Product with this name already exists");
         }
-        if (productDTO.getCategory().getId() == null) {
+        if (productDTO.getCategory() == null || productDTO.getCategory().getId() == null) {
             throw new IllegalArgumentException("Product must have a valid category");
         }
-        categoryRepository.findById(productDTO.getCategory().getId())
+        Category category = categoryRepository.findById(productDTO.getCategory().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
 
-        var product = productMapper.toEntity(productDTO);
-        return productMapper.toDTO(productRepository.save(product));
+        var product = dtoToEntity(productDTO);
+        product.setCategory(category);
+        product = productRepository.save(product);
+        return entityToDTO(product);
     }
 
     // Read
     public List<ProductDTO> getAllProducts() {
         return productRepository.findAll().stream()
-                .map(productMapper::toDTO)
+                .map(this::entityToDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<ProductDTO> getProductById(Long id) {
-        return productRepository.findById(id).map(productMapper::toDTO);
+        return productRepository.findById(id).map(this::entityToDTO);
     }
 
     public List<ProductDTO> getProductsByCategory(Long categoryId) {
@@ -66,13 +59,13 @@ public class ProductService {
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + categoryId));
 
         return productRepository.findByCategory(category).stream()
-                .map(productMapper::toDTO)
+                .map(this::entityToDTO)
                 .collect(Collectors.toList());
     }
 
     public List<ProductDTO> searchProducts(String keyword) {
         return productRepository.findByNameContainingIgnoreCase(keyword).stream()
-                .map(productMapper::toDTO)
+                .map(this::entityToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -99,13 +92,14 @@ public class ProductService {
             }
 
             if (productDetails.getCategory() != null && productDetails.getCategory().getId() != null) {
-                categoryRepository.findById(productDetails.getCategory().getId())
+                Category category = categoryRepository.findById(productDetails.getCategory().getId())
                         .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
-                product.setCategory(categoryRepository.findById(productDetails.getCategory().getId()).orElse(null));
+                product.setCategory(category);
             }
         }
 
-        return productMapper.toDTO(productRepository.save(product));
+        product = productRepository.save(product);
+        return entityToDTO(product);
     }
 
     // Delete
@@ -116,6 +110,7 @@ public class ProductService {
         productRepository.delete(product);
     }
 
+    // Paginated Read
     public Page<ProductDTO> getAllProducts(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Product> productPage;
@@ -126,11 +121,41 @@ public class ProductService {
             productPage = productRepository.findAll(pageable);
         }
 
-        List<ProductDTO> productDTOList = new ArrayList<>();
-        for (Product product : productPage.getContent()) {
-            ProductDTO productDTO = productMapper.toDTO(product);
-            productDTOList.add(productDTO);
-        }
+        List<ProductDTO> productDTOList = productPage.getContent().stream()
+                .map(this::entityToDTO)
+                .collect(Collectors.toList());
+
         return new PageImpl<>(productDTOList, pageable, productPage.getTotalElements());
+    }
+
+    // Manual mapping from DTO to Entity
+    private Product dtoToEntity(ProductDTO productDTO) {
+        Product product = new Product();
+        product.setName(productDTO.getName());
+        product.setDescription(productDTO.getDescription());
+        product.setPrice(productDTO.getPrice());
+        product.setAvailable(productDTO.getAvailable());
+        // Category will be set in create/update methods after fetching from repository
+        return product;
+    }
+
+    // Manual mapping from Entity to DTO
+    private ProductDTO entityToDTO(Product product) {
+        ProductDTO productDTO = new ProductDTO();
+
+        productDTO.setId(product.getId());
+        productDTO.setName(product.getName());
+        productDTO.setDescription(product.getDescription());
+        productDTO.setPrice(product.getPrice());
+        productDTO.setAvailable(product.getAvailable());
+
+        if (product.getCategory() != null) {
+            CategoryDTO categoryDTO = new CategoryDTO();
+            categoryDTO.setId(product.getCategory().getId());
+            categoryDTO.setName(product.getCategory().getName());
+            productDTO.setCategory(categoryDTO);
+        }
+
+        return productDTO;
     }
 }

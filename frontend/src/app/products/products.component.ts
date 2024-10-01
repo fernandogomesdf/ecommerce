@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { Product, ProductService } from './products.service';
+import { Category, Product, ProductService } from './products.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -20,18 +20,21 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { TableLazyLoadEvent } from 'primeng/table';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { DropdownModule } from 'primeng/dropdown';
 
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [ToastModule, ConfirmDialogModule, CheckboxModule, FormsModule, ReactiveFormsModule, DialogModule, TagModule, CommonModule, TableModule, InputTextareaModule, InputNumberModule, ButtonModule, InputGroupModule, InputGroupAddonModule, InputTextModule],
+  imports: [ToastModule, ConfirmDialogModule, CheckboxModule, FormsModule, ReactiveFormsModule, DialogModule, TagModule, CommonModule, TableModule, InputTextareaModule, InputNumberModule, ButtonModule, InputGroupModule, InputGroupAddonModule, InputTextModule, DropdownModule],
   templateUrl: './products.component.html',
   styleUrl: './products.component.scss',
   providers: [MessageService, ConfirmationService],
 })
 export class ProductsComponent {
+
   products: Product[] = [];
+  categories: Category[] = [];
   totalRecords: number = 0;
   loading: boolean = false;
   rows: number = 5; 
@@ -59,6 +62,18 @@ export class ProductsComponent {
 
   ngOnInit() {
     this.loading = true;
+    this.loadCategories();
+  }
+
+  loadCategories() {
+    this.productService.loadCategories().subscribe(
+      (data) => {
+        this.categories = data;
+      },
+      (error) => {
+        console.error('Error loading categories', error);
+      }
+    );
   }
 
   loadProductsLazy(event: TableLazyLoadEvent) {

@@ -41,7 +41,7 @@
               [severity]="product.available ? 'success' : 'danger'"
             ></p-tag>
           </td>
-          <td>{{ product.category.name }}</td>
+          <td>{{ product.category?.name }}</td>
           <td>
             <p-button
               icon="pi pi-pencil"
@@ -73,6 +73,19 @@
         <tr>
          <td><label for="name">Name</label></td>
          <td><input id="name" type="text" pInputText formControlName="name" required /></td>
+        </tr>
+        <tr>
+          <td><label for="category">Category</label></td>
+          <td>
+            <p-dropdown
+              inputId="category"
+              [options]="categories"
+              optionLabel="name"
+              formControlName="category"
+              placeholder="Select a category"
+              [showClear]="true"
+            ></p-dropdown>
+          </td>
         </tr>
         <tr>
           <td><label for="description">Description</label></td>

@@ -30,9 +30,14 @@ export interface ProductResponse {
   providedIn: 'root'
 })
 export class ProductService {
+  
   private apiUrl = 'http://localhost:8080/api/products';
 
   constructor(private http: HttpClient) {}
+
+  loadCategories() {
+    return this.http.get<Category[]>('http://localhost:8080/api/categories');
+  }
 
   getProducts(page: number, size: number, search?: string): Observable<ProductResponse> {
     let params = new HttpParams()
