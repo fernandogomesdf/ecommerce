@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Category {
@@ -30,16 +30,21 @@ export interface ProductResponse {
   providedIn: 'root'
 })
 export class ProductService {
+
+  private apiBaseUrl = 'http://localhost:8080/api';
+  private apiProductUrl = this.apiBaseUrl + '/products';
   
-  private apiUrl = 'http://localhost:8080/api/products';
+  private authHeader = 'Basic ' + btoa('admin:admin'); // should be kept safe
 
   constructor(private http: HttpClient) {}
 
-  loadCategories() {
-    return this.http.get<Category[]>('http://localhost:8080/api/categories');
+  loadCategories(): Observable<Category[]> {
+    const headers = new HttpHeaders().set('Authorization', this.authHeader);
+    return this.http.get<Category[]>(this.apiBaseUrl + '/categories', { headers });
   }
 
   getProducts(page: number, size: number, search?: string): Observable<ProductResponse> {
+    const headers = new HttpHeaders().set('Authorization', this.authHeader);
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
@@ -48,18 +53,21 @@ export class ProductService {
       params = params.set('search', search);
     }
 
-    return this.http.get<ProductResponse>(this.apiUrl, { params });
+    return this.http.get<ProductResponse>(this.apiProductUrl, { headers, params });
   }
 
   createProduct(product: Product): Observable<Product> {
-    return this.http.post<Product>(this.apiUrl, product);
+    const headers = new HttpHeaders().set('Authorization', this.authHeader);
+    return this.http.post<Product>(this.apiProductUrl, product, { headers });
   }
 
   updateProduct(product: Product): Observable<Product> {
-    return this.http.put<Product>(`${this.apiUrl}/${product.id}`, product);
+    const headers = new HttpHeaders().set('Authorization', this.authHeader);
+    return this.http.put<Product>(`${this.apiProductUrl}/${product.id}`, product, { headers });
   }
 
   deleteProduct(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    const headers = new HttpHeaders().set('Authorization', this.authHeader);
+    return this.http.delete<void>(`${this.apiProductUrl}/${id}`, { headers });
   }
 }
