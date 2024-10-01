@@ -16,6 +16,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authz -> authz
+                        .requestMatchers(request -> request.getMethod().equals("OPTIONS")).permitAll() // Permit OPTIONS
                         .anyRequest().authenticated()
                 )
                 .httpBasic(withDefaults())
